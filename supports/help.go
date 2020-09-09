@@ -5,7 +5,7 @@ import "fmt"
 func Help() {
 	fmt.Print("WSL2 Forwarding Port Management \n\n")
 	fmt.Println("Usage:")
-	fmt.Println("	wfpm <command> [arguments]")
+	fmt.Println("	wfp-cli <command> [arguments]")
 	fmt.Print("\nThe commands are:\n\n")
 	fmt.Println("	ls		List all of port")
 	fmt.Println("	create		Create a forwarding port rule to wsl2")
@@ -15,11 +15,11 @@ func Help() {
 func CreateHelp() {
 	fmt.Print("WSL2 Forwarding Port Management \n\n")
 	fmt.Println("Usage:")
-	fmt.Println("	wfpm create --proto=<TCP|UDP> --port=<window port>:<wsl2 port> ")
+	fmt.Println("	wfp-cli create --proto=<TCP|UDP> --port=<window port>:<wsl2 port> ")
 }
 
 func DeleteHelp() {
 	fmt.Print("WSL2 Forwarding Port Management \n\n")
 	fmt.Println("Usage:")
-	fmt.Println("	wfpm delete <rule id> ")
+	fmt.Println("	wfp-cli delete <rule id> ")
 }
