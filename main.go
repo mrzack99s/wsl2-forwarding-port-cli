@@ -76,9 +76,6 @@ func main() {
 
 	configs.ParseForwardingTable(filename)
 
-	rules := []structs.RuleStruct{}
-	rulesTable := structs.RulesTable{rules}
-
 	var protoPtr, portPtr *string
 
 	var ip string
@@ -118,8 +115,8 @@ func main() {
 			status := cmds.CreateRule(createArgs, ip)
 			if status {
 				rule.Id = substringhash
-				rulesTable.AppendRules(rule)
-				writeFile(filename, rulesTable)
+				configs.RulesTable.AppendRules(rule)
+				writeFile(filename, configs.RulesTable)
 			}
 		} else {
 			fmt.Println("The rule is already.....")
