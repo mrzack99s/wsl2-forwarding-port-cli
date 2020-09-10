@@ -147,7 +147,8 @@ func main() {
 
 	case "ls":
 		cmds.Lists()
-
+	case "version":
+		fmt.Println("WSL2-Forwarding-port-cli version 1.1.1")
 	default:
 		supports.Help()
 		os.Exit(0)
