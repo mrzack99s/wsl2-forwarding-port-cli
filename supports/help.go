@@ -9,7 +9,8 @@ func Help() {
 	fmt.Print("\nThe commands are:\n\n")
 	fmt.Println("	ls		List all of port")
 	fmt.Println("	create		Create a forwarding port rule to wsl2")
-	fmt.Print("	delete		Delete a forwarding port rule to wsl2\n\n")
+	fmt.Println("	delete		Delete a forwarding port rule to wsl2")
+	fmt.Print("	version		Display release version\n\n")
 }
 
 func CreateHelp() {

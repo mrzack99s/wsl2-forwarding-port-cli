@@ -111,7 +111,8 @@ func main() {
 		hash := asSha256(rule)
 		substringhash := hash[:8]
 
-		if !checkAlreadyRuleByID(substringhash) && !checkAlreadyRuleBySPortAndProto(rule.SourcePort, rule.Protocol) {
+		alreadyRule := checkAlreadyRuleByID(substringhash)
+		if !alreadyRule && !checkAlreadyRuleBySPortAndProto(rule.SourcePort, rule.Protocol) {
 			status := cmds.CreateRule(createArgs, ip)
 			if status {
 				rule.Id = substringhash
@@ -119,7 +120,11 @@ func main() {
 				writeFile(filename, configs.RulesTable)
 			}
 		} else {
-			fmt.Println("The rule is already.....")
+			if alreadyRule {
+				fmt.Println("The rule is already.....")
+			} else {
+				fmt.Println("The source port has duplicate.....")
+			}
 		}
 	case "delete":
 		if len(os.Args) < 3 {
@@ -148,7 +153,7 @@ func main() {
 	case "ls":
 		cmds.Lists()
 	case "version":
-		fmt.Println("WSL2-Forwarding-port-cli version 1.1.1")
+		fmt.Println("WSL2-Forwarding-port-cli version 1.1.2")
 	default:
 		supports.Help()
 		os.Exit(0)

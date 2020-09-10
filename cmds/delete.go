@@ -24,17 +24,17 @@ func DeleteRule(id string) (int, bool) {
 	index, rule, err := FindElement(id)
 	if err == nil {
 
-		exec.Command("netsh.exe", "interface", "portproxy", "delete", "v4tov4",
-			"listenport="+rule.SourcePort, "listenaddress=0.0.0.0").Run()
-
 		out, _ := exec.Command("netsh.exe", "advfirewall", "firewall", "delete", "rule",
 			"name="+rule.Protocol+" Port "+rule.SourcePort, "protocol="+rule.Protocol, "localport="+rule.SourcePort).Output()
 
 		if strings.Contains(string(out), "Ok") {
+			exec.Command("netsh.exe", "interface", "portproxy", "delete", "v4tov4",
+				"listenport="+rule.SourcePort, "listenaddress=0.0.0.0").Run()
 			fmt.Println("Deleted success")
 			return index, true
 		}
 	}
 
+	fmt.Println("Please run wsl2 with an administrator....")
 	return index, false
 }
