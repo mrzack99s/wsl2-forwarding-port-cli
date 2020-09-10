@@ -43,9 +43,18 @@ func asSha256(o interface{}) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func checkAlreadyRule(id string) bool {
+func checkAlreadyRuleByID(id string) bool {
 	for _, rule := range configs.RulesTable.Rules {
 		if id == rule.Id {
+			return true
+		}
+	}
+	return false
+}
+
+func checkAlreadyRuleBySPortAndProto(port string, proto string) bool {
+	for _, rule := range configs.RulesTable.Rules {
+		if port == rule.SourcePort && proto == rule.Protocol {
 			return true
 		}
 	}
@@ -105,7 +114,7 @@ func main() {
 		hash := asSha256(rule)
 		substringhash := hash[:8]
 
-		if !checkAlreadyRule(substringhash) {
+		if !checkAlreadyRuleByID(substringhash) && !checkAlreadyRuleBySPortAndProto(rule.SourcePort, rule.Protocol) {
 			status := cmds.CreateRule(createArgs, ip)
 			if status {
 				rule.Id = substringhash
@@ -123,7 +132,7 @@ func main() {
 
 			id := os.Args[2]
 
-			if checkAlreadyRule(id) {
+			if checkAlreadyRuleByID(id) {
 				index, status := cmds.DeleteRule(id)
 				if status {
 					length := len(configs.RulesTable.Rules)

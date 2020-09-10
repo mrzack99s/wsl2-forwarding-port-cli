@@ -7,11 +7,12 @@ import (
 )
 
 func Lists() {
-	fmt.Printf("%-10s%-15s%-10s%-10s%-10s\n", "ID", "WSL2 IPADDR", "PROTOCOL", "SPORT", "DPORT")
-	fmt.Println("-------------------------------------------------------")
+	fmt.Println("--------------------------------------------------------------------")
+	fmt.Printf("%-10s%-22s%-12s%-12s%-12s\n", "ID", "WSL2 IPADDR", "PROTOCOL", "SPORT", "DPORT")
+	fmt.Println("--------------------------------------------------------------------")
 	if len(configs.RulesTable.Rules) > 0 {
 		for _, rule := range configs.RulesTable.Rules {
-			fmt.Printf("%-10s%-15s%-10s%-10s%-10s\n", rule.Id, rule.IpAddress, rule.Protocol, rule.SourcePort, rule.DestinationPort)
+			fmt.Printf("%-10s%-22s%-10s%-10s%-10s\n", rule.Id, rule.IpAddress, rule.Protocol, rule.SourcePort, rule.DestinationPort)
 		}
 	}
 

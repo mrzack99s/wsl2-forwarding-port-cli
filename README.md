@@ -11,7 +11,7 @@ WSL2-forwarding-port-cli is command line tools for wsl2 forwarding port configur
 1. Open WSL2 with Run Administrator
 2. Download the binary with the command 
 ```
-    curl -LO https://github.com/mrzack99s/wsl2-forwarding-port-cli/releases/download/v1.0.0/wfp-cli
+    curl -LO https://github.com/mrzack99s/wsl2-forwarding-port-cli/releases/download/v1.1.0/wfp-cli
 ```
 3. Make the kubectl binary executable.
 ```
