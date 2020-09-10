@@ -13,7 +13,7 @@ WSL2-forwarding-port-cli is command line tools for wsl2 forwarding port configur
 ```
     curl -LO https://github.com/mrzack99s/wsl2-forwarding-port-cli/releases/download/v1.1.2/wfp-cli
 ```
-3. Make the kubectl binary executable.
+3. Make the wfp-cli binary executable.
 ```
     chmod +x wfp-cli
 ```
