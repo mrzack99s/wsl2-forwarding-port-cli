@@ -6,12 +6,15 @@
 WSL2-forwarding-port-cli is command line tools for wsl2 forwarding port configure
 
 
+## Requirement
+- wsl2-forwarding-port-engine [go to repository](https://github.com/mrzack99s/wsl2-forwarding-port-engine)
+
 ## How to install
 
 1. Open WSL2
 2. Download the binary with the command 
 ```
-    curl -LO https://github.com/mrzack99s/wsl2-forwarding-port-cli/releases/download/v1.1.2/wfp-cli
+    curl -LO https://github.com/mrzack99s/wsl2-forwarding-port-cli/releases/download/v2.0.0/wfp-cli
 ```
 3. Make the wfp-cli binary executable.
 ```
@@ -24,21 +27,13 @@ WSL2-forwarding-port-cli is command line tools for wsl2 forwarding port configur
 
 Let's enjoy !!!!
 
-## How to use
-# Use in WSL2
-1. Open WSL2 with an administrator
+# How to use
+## Use in WSL2
+1. Open WSL2
 2. Use the command
 ```
     wfp-cli <command>
 ```
-
-# Use in Powershell or CMD
-1. Open Powershell or CMD with an administrator
-2. Use the command
-```
-    wsl wfp-cli <command>
-```
-
 ## License
 
 Copyright (c) 2020 - Chatdanai Phakaket

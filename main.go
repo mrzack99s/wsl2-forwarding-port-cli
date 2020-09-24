@@ -3,11 +3,14 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/mrzack99s/wsl2-forwarding-port-cli/structs"
 
@@ -52,6 +55,15 @@ func checkAlreadyRuleByID(id string) bool {
 	return false
 }
 
+func FindElement(id string) (int, structs.RuleStruct, error) {
+	for i, rule := range configs.RulesTable.Rules {
+		if rule.Id == id {
+			return i, rule, nil
+		}
+	}
+	return -1, structs.RuleStruct{}, errors.New("No found")
+}
+
 func checkAlreadyRuleBySPortAndProto(port string, proto string) bool {
 	for _, rule := range configs.RulesTable.Rules {
 		if port == rule.SourcePort && proto == rule.Protocol {
@@ -94,6 +106,22 @@ func main() {
 		}
 	}
 
+	out, _ := exec.Command("bash", "-c", "ip route | grep default | awk '{print $3}'").Output()
+	winIp := strings.TrimSpace(string(out))
+
+	udpAddr, err := net.ResolveUDPAddr("udp", winIp+":40123")
+	if err != nil {
+		fmt.Println("Wrong Address")
+		return
+	}
+
+	//Create the connection
+	udpConn, err := net.DialUDP("udp", nil, udpAddr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	switch os.Args[1] {
 	case "create":
 		createCommand := flag.NewFlagSet("create", flag.ExitOnError)
@@ -113,12 +141,39 @@ func main() {
 
 		alreadyRule := checkAlreadyRuleByID(substringhash)
 		if !alreadyRule && !checkAlreadyRuleBySPortAndProto(rule.SourcePort, rule.Protocol) {
-			status := cmds.CreateRule(createArgs, ip)
+
+			message := []byte("create@" + substringhash + "@" + rule.Protocol + "@" + rule.SourcePort + "@" + rule.DestinationPort)
+			_, err = udpConn.Write(message)
+
+			status := false
+			//Keep calling this function
+			for {
+				buffer := make([]byte, 2048)
+				n, _, err := udpConn.ReadFromUDP(buffer)
+				if err != nil {
+					break
+				} else {
+					if strings.TrimSpace(string(buffer[0:n])) == "SUCCESS" {
+						status = true
+						break
+					} else if strings.TrimSpace(string(buffer[0:n])) == "ALREADY" {
+						fmt.Println("The rule is already.....")
+						break
+					} else {
+						break
+					}
+				}
+			}
+
 			if status {
 				rule.Id = substringhash
 				configs.RulesTable.AppendRules(rule)
 				writeFile(filename, configs.RulesTable)
+				fmt.Println("Inserted success")
 			}
+
+			udpConn.Close()
+
 		} else {
 			if alreadyRule {
 				fmt.Println("The rule is already.....")
@@ -135,15 +190,43 @@ func main() {
 			id := os.Args[2]
 
 			if checkAlreadyRuleByID(id) {
-				index, status := cmds.DeleteRule(id)
-				if status {
-					length := len(configs.RulesTable.Rules)
+				index, _, err := FindElement(id)
+				if err == nil {
 
-					configs.RulesTable.Rules[index] = configs.RulesTable.Rules[length-1] // Copy last element to index i
-					configs.RulesTable.Rules[length-1] = structs.RuleStruct{}            // Erase last element )
-					configs.RulesTable.Rules = configs.RulesTable.Rules[:length-1]       // Truncate slice
+					message := []byte("delete@" + id)
+					_, err = udpConn.Write(message)
 
-					writeFile(filename, configs.RulesTable)
+					status := false
+					//Keep calling this function
+					for {
+						buffer := make([]byte, 2048)
+						n, _, err := udpConn.ReadFromUDP(buffer)
+						if err != nil {
+							break
+						} else {
+							if strings.TrimSpace(string(buffer[0:n])) == "SUCCESS" {
+								status = true
+								break
+							} else if strings.TrimSpace(string(buffer[0:n])) == "ALREADY" {
+								fmt.Println("The rule is already.....")
+								break
+							} else {
+								break
+							}
+						}
+					}
+
+					if status {
+						length := len(configs.RulesTable.Rules)
+
+						configs.RulesTable.Rules[index] = configs.RulesTable.Rules[length-1] // Copy last element to index i
+						configs.RulesTable.Rules[length-1] = structs.RuleStruct{}            // Erase last element )
+						configs.RulesTable.Rules = configs.RulesTable.Rules[:length-1]       // Truncate slice
+						writeFile(filename, configs.RulesTable)
+						fmt.Println("Delete success")
+					}
+
+					udpConn.Close()
 				}
 			} else {
 				fmt.Println("Not have the rule in table.....")
@@ -153,7 +236,7 @@ func main() {
 	case "ls":
 		cmds.Lists()
 	case "version":
-		fmt.Println("WSL2-Forwarding-port-cli version 1.1.2")
+		fmt.Println("WSL2-Forwarding-port-cli version 2.0.0")
 	default:
 		supports.Help()
 		os.Exit(0)
