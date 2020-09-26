@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
@@ -86,6 +87,22 @@ func main() {
 		os.Exit(0)
 	}
 
+	out, _ := exec.Command("bash", "-c", "ip route | grep default | awk '{print $3}'").Output()
+	winIp := strings.TrimSpace(string(out))
+
+	udpAddr, err := net.ResolveUDPAddr("udp", winIp+":40123")
+	if err != nil {
+		fmt.Println("Wrong Address")
+		return
+	}
+
+	//Create the connection
+	udpConn, err := net.DialUDP("udp", nil, udpAddr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	configs.ParseForwardingTable(filename)
 
 	var protoPtr, portPtr *string
@@ -104,22 +121,6 @@ func main() {
 				ip = ipnet.IP.String()
 			}
 		}
-	}
-
-	out, _ := exec.Command("bash", "-c", "ip route | grep default | awk '{print $3}'").Output()
-	winIp := strings.TrimSpace(string(out))
-
-	udpAddr, err := net.ResolveUDPAddr("udp", winIp+":40123")
-	if err != nil {
-		fmt.Println("Wrong Address")
-		return
-	}
-
-	//Create the connection
-	udpConn, err := net.DialUDP("udp", nil, udpAddr)
-	if err != nil {
-		fmt.Println(err)
-		return
 	}
 
 	switch os.Args[1] {
@@ -233,10 +234,73 @@ func main() {
 			}
 		}
 
+	case "purge":
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Are you sure to purge? (Y,n): ")
+		ans, _ := reader.ReadString('\n')
+		if strings.TrimSpace(ans) == "Y" {
+			message := []byte("purge@Y")
+			_, err = udpConn.Write(message)
+
+			status := false
+			//Keep calling this function
+			for {
+				buffer := make([]byte, 2048)
+				n, _, err := udpConn.ReadFromUDP(buffer)
+				if err != nil {
+					break
+				} else {
+					if strings.TrimSpace(string(buffer[0:n])) == "SUCCESS" {
+						status = true
+						break
+					} else {
+						break
+					}
+				}
+			}
+			if status {
+				configs.RulesTable.Rules = nil
+				writeFile(filename, configs.RulesTable)
+				fmt.Println("Purge success")
+			}
+
+		}
+
 	case "ls":
 		cmds.Lists()
 	case "version":
-		fmt.Println("WSL2-Forwarding-port-cli version 2.0.0")
+		cliVersion := "2.1.0"
+		if len(os.Args) < 3 {
+			supports.VersionHelp()
+		} else {
+			if os.Args[2] == "--client" {
+				fmt.Println("WSL2-Forwarding-port-cli version 2.0.1")
+			} else if os.Args[2] == "--all" {
+				message := []byte("get@engine_version")
+				_, err = udpConn.Write(message)
+
+				status := false
+				//Keep calling this function
+				engineVersion := ""
+				for {
+					buffer := make([]byte, 2048)
+					n, _, err := udpConn.ReadFromUDP(buffer)
+					if err != nil {
+						break
+					} else {
+						status = true
+						engineVersion = strings.TrimSpace(string(buffer[0:n]))
+						break
+					}
+				}
+				if status {
+					fmt.Println("WSL2-Forwarding-port-cli version " + cliVersion)
+					fmt.Println("WSL2-Forwarding-port-engine version " + engineVersion)
+				}
+			} else {
+				supports.VersionHelp()
+			}
+		}
 	default:
 		supports.Help()
 		os.Exit(0)
