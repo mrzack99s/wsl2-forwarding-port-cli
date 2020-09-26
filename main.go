@@ -274,7 +274,7 @@ func main() {
 			supports.VersionHelp()
 		} else {
 			if os.Args[2] == "--client" {
-				fmt.Println("WSL2-Forwarding-port-cli version 2.0.1")
+				fmt.Println("WSL2-Forwarding-port-cli version " + cliVersion)
 			} else if os.Args[2] == "--all" {
 				message := []byte("get@engine_version")
 				_, err = udpConn.Write(message)
