@@ -7,6 +7,7 @@ WSL2-forwarding-port-cli is command line tools for wsl2 forwarding port configur
 
 
 ## Requirement
+- [Recommended] wsl2-forwarding-port-engine version 1.0.0-beta [go to repository](https://github.com/mrzack99s/wsl2-forwarding-port-engine-go)
 - wsl2-forwarding-port-engine version >0.3.x [go to repository](https://github.com/mrzack99s/wsl2-forwarding-port-engine)
 
 ## How to install
